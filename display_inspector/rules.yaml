@@ -1,0 +1,195 @@
+# 服装门店陈列检查规则库
+# 来源：题目给定的「类别 / 规则」表。Agent 只能引用下列 rule_id，不得另立标准。
+
+source: "题目给定：服装门店陈列检查标准表"
+severity_definition:
+  高: "安全隐患、疏散占用、设备倾倒风险、商品触地"
+  中: "影响售卖或整洁的问题"
+  低: "轻微对齐、一致性等视觉问题"
+
+photo_validity:
+  id: P01
+  category: 照片有效性
+  text: "若照片模糊、过暗、遮挡或陈列出画，相关检查项必须输出「无法判断」，不得在视觉信息不足时推测整店情况。"
+
+categories:
+  - id: hanging
+    name: 挂装
+    object_label: 挂装
+    rules:
+      - id: H01
+        text: "同一组衣架方向、材质、颜色须一致"
+        severity: 低
+        observation_all_true: [hanger_direction_consistent, hanger_material_consistent, hanger_color_consistent]
+        problem: "同一组衣架方向、材质或颜色不一致"
+        suggestion: "统一同组衣架的挂钩朝向、材质与颜色，撤换混用衣架"
+      - id: H02
+        text: "衣架间距须均匀"
+        severity: 低
+        observation_all_true: [spacing_even]
+        problem: "衣架间距不均匀"
+        suggestion: "按统一间距重新悬挂，消除过密或过疏区段"
+      - id: H03
+        text: "服装须自然垂直悬挂"
+        severity: 低
+        observation_all_true: [clothes_hang_vertically]
+        problem: "服装未自然垂直悬挂"
+        suggestion: "整理衣身与袖口，使服装自然垂直、无歪斜褶皱"
+      - id: H04
+        text: "按品类分组，且颜色呈连续过渡"
+        severity: 中
+        observation_all_true: [grouped_by_category, color_sequence_continuous]
+        problem: "未按品类分组，或颜色排列不连续"
+        suggestion: "按品类分区陈列，并按深浅/色相做连续色序"
+      - id: H05
+        text: "不允许大面积空衣架"
+        severity: 中
+        observation_all_true: [no_large_empty_hangers]
+        problem: "出现大面积空衣架"
+        suggestion: "补货填满空段，或撤下空衣架并收拢成连续陈列"
+
+  - id: folded
+    name: 叠装
+    object_label: 叠装
+    rules:
+      - id: F01
+        text: "同摞折叠宽度一致，前缘对齐"
+        severity: 低
+        observation_all_true: [fold_width_consistent, front_edges_aligned]
+        problem: "同摞折叠宽度不一致或前缘未对齐"
+        suggestion: "按统一折宽重新折叠，并使每摞前缘齐平"
+      - id: F02
+        text: "每摞 3–6 件，最多 6 件"
+        severity: 中
+        observation_all_true: [stack_count_in_range]
+        problem: "叠装件数不在 3–6 件范围内（最多 6 件）"
+        suggestion: "将每摞调整为 3–6 件，超出部分另起新摞或回仓"
+      - id: F03
+        text: "堆叠须稳固"
+        severity: 中
+        observation_all_true: [stack_stable]
+        problem: "叠装堆叠不稳"
+        suggestion: "重新叠放，降低重心，避免歪斜倒塌"
+      - id: F04
+        text: "商品不得触地"
+        severity: 高
+        observation_all_true: [not_touching_floor]
+        problem: "商品接触地面"
+        suggestion: "立即将触地商品下架清洁，重新陈列于层板内"
+      - id: F05
+        text: "商品不得探出层板"
+        severity: 中
+        observation_all_true: [not_overhanging_shelf]
+        problem: "商品探出层板边缘"
+        suggestion: "将商品完全收回层板内，避免掉落与边沿不齐"
+
+  - id: mannequin
+    name: 模特
+    object_label: 模特
+    rules:
+      - id: M01
+        text: "须有完整上装和下装"
+        severity: 中
+        observation_all_true: [complete_outfit]
+        problem: "模特上装或下装不完整"
+        suggestion: "为模特补齐完整上装与下装"
+      - id: M02
+        text: "若露脚，鞋子须成双"
+        severity: 中
+        observation_all_true: [shoes_paired_if_feet_visible]
+        problem: "模特露脚但鞋子不成双"
+        suggestion: "露脚时配成双鞋；若不露脚需整理裤脚/裙摆"
+      - id: M03
+        text: "服装须平整"
+        severity: 低
+        observation_all_true: [clothing_smooth]
+        problem: "模特服装不平整"
+        suggestion: "抚平褶皱，整理领口、衣摆与袖口"
+      - id: M04
+        text: "价签不得外露"
+        severity: 中
+        observation_all_true: [price_tags_hidden]
+        problem: "模特服装上价签外露"
+        suggestion: "将价签收入内侧或拆除展示用吊牌"
+      - id: M05
+        text: "模特及底座须稳固"
+        severity: 高
+        observation_all_true: [base_stable]
+        problem: "模特或底座不稳，存在倾倒风险"
+        suggestion: "立即扶正并加固底座，必要时隔离现场防止碰倒"
+
+  - id: accessories
+    name: 鞋包配件
+    object_label: 鞋包配件
+    rules:
+      - id: A01
+        text: "鞋须成双"
+        severity: 中
+        observation_all_true: [shoes_paired]
+        problem: "鞋未成双陈列"
+        suggestion: "按成双补齐或成对摆放"
+      - id: A02
+        text: "朝向须一致"
+        severity: 低
+        observation_all_true: [facing_consistent]
+        problem: "鞋包配件朝向不一致"
+        suggestion: "统一朝向（如全部鞋头向右）后重新摆放"
+      - id: A03
+        text: "须等距对齐"
+        severity: 低
+        observation_all_true: [equally_spaced_aligned]
+        problem: "鞋包配件间距不等或未对齐"
+        suggestion: "按统一间距与轴线对齐摆放"
+      - id: A04
+        text: "不得探出层板或遮挡价签"
+        severity: 中
+        observation_all_true: [not_overhanging_or_blocking_tags]
+        problem: "配件探出层板或遮挡价签"
+        suggestion: "收回层板内并避开价签正面"
+
+  - id: price_tag
+    name: 价签
+    object_label: 价签
+    rules:
+      - id: T01
+        text: "每个陈列组须有价签"
+        severity: 中
+        observation_all_true: [present_for_each_group]
+        problem: "存在陈列组缺少价签"
+        suggestion: "为每个陈列组补齐价签"
+      - id: T02
+        text: "价签须端正、朝前、无遮挡"
+        severity: 中
+        observation_all_true: [upright_forward_unobstructed]
+        problem: "价签歪斜、背对或被遮挡"
+        suggestion: "将价签扶正、朝向顾客，并清除遮挡物"
+      - id: T03
+        text: "价签文字无法辨认时，只判断为「内容无法判断」"
+        severity: 低
+        special: content_illegible
+        observation_fields: [text_legible]
+        problem: "价签文字无法辨认"
+        suggestion: "建议人工复核价签内容，或更换清晰价签后重拍"
+
+  - id: cleanliness
+    name: 清洁与安全
+    object_label: 店内环境
+    rules:
+      - id: S01
+        text: "无垃圾、污渍、纸箱、补货袋等杂物"
+        severity: 中
+        observation_all_true: [no_clutter]
+        problem: "存在垃圾、污渍、纸箱、补货袋等杂物"
+        suggestion: "清除杂物与污渍，补货物料不得滞留销售区"
+      - id: S02
+        text: "通道、疏散区域、消防设施不得占用"
+        severity: 高
+        observation_all_true: [aisles_and_safety_clear]
+        problem: "通道、疏散区域或消防设施被占用"
+        suggestion: "立即清理占用物，恢复疏散宽度与消防设施可见可用"
+      - id: S03
+        text: "货架、层板、挂杆不得松动或倾斜"
+        severity: 高
+        observation_all_true: [fixtures_stable]
+        problem: "货架、层板或挂杆松动、倾斜"
+        suggestion: "立即停止使用该货架并加固或报修，防止倾倒伤人"

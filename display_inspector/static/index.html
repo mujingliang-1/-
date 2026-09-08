@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>服装门店陈列检查助手</title>
+  <link rel="stylesheet" href="/assets/styles.css" />
+</head>
+<body>
+  <header class="hero">
+    <div class="hero-inner">
+      <p class="eyebrow">01 ｜ 服装连锁督导工具</p>
+      <h1>服装门店陈列检查助手</h1>
+      <p class="lede">上传门店照片，按总部统一陈列标准逐条核验。信息不充分时明确输出「无法判断」，不凭常识推测整店。</p>
+    </div>
+  </header>
+
+  <main class="layout">
+    <section class="panel">
+      <h2>1. 上传门店照片</h2>
+      <label class="drop" id="drop">
+        <input id="file" type="file" accept="image/*" multiple />
+        <strong>点击或拖拽上传</strong>
+        <span>支持 jpg / png / webp，可多张，单张不超过 12MB</span>
+      </label>
+      <div class="thumbs" id="thumbs"></div>
+
+      <div class="field">
+        <label for="region">拍摄区域（可选）</label>
+        <div class="chips" id="regions">
+          <button type="button" data-value="全景" class="on">全景</button>
+          <button type="button" data-value="挂装">挂装</button>
+          <button type="button" data-value="叠装">叠装</button>
+          <button type="button" data-value="模特">模特</button>
+          <button type="button" data-value="鞋包配件">鞋包配件</button>
+          <button type="button" data-value="价签">价签</button>
+        </div>
+      </div>
+
+      <div class="field">
+        <label for="note">补充文字（可选）</label>
+        <textarea id="note" rows="2" placeholder="例如：这是主通道右侧挂装区，补货尚未结束。"></textarea>
+      </div>
+
+      <details class="advanced">
+        <summary>视觉接口（可选，OpenAI 兼容）</summary>
+        <p class="hint">不填则使用服务端已配置的云端视觉模型，或内置本地视觉模型。支持智谱 GLM-4V、通义千问 VL、GPT-4o 等。</p>
+        <input id="apiKey" type="password" placeholder="API Key" autocomplete="off" />
+        <input id="baseUrl" type="url" placeholder="Base URL，如 https://open.bigmodel.cn/api/paas/v4" />
+        <input id="model" type="text" placeholder="模型名，如 glm-4v-flash / gpt-4o-mini" />
+      </details>
+
+      <button class="primary" id="run" type="button">开始检查</button>
+      <p class="status" id="status"></p>
+
+      <h2>内置自测样例</h2>
+      <div class="samples" id="samples"></div>
+    </section>
+
+    <section class="panel result-panel">
+      <h2>2. 检查报告</h2>
+      <div id="empty" class="empty">上传照片或点击自测样例后，这里会给出结构化报告。</div>
+      <div id="report" hidden></div>
+    </section>
+  </main>
+
+  <section class="panel rules-panel">
+    <h2>题目规则库（Agent 只引用这些规则）</h2>
+    <p class="hint">判断依据来自下列标准，而不是大模型常识。严重程度定义也写死在规则库中。</p>
+    <div id="rules" class="rules-grid"></div>
+  </section>
+
+  <footer>
+    <span>输出字段：是否合规 · 具体问题 · 对应检查标准 · 所在区域 · 严重程度 · 整改建议 · 无法判断原因</span>
+  </footer>
+  <script src="/assets/app.js"></script>
+</body>
+</html>
