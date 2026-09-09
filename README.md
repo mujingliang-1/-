@@ -6,11 +6,17 @@
 
 ## 1. Agent 访问入口
 
-**在线试用（可直接打开）：** https://exemption-leeds-incident-cause.trycloudflare.com
+智能体跑在海外机器上。`*.trycloudflare.com` 是 Cloudflare 临时隧道，**国内网络经常无法解析或被拦截**，所以浏览器会显示打不开。这不是页面坏了。
 
-打开后即可上传门店照片，或点击「模糊过暗样例」（秒出「无法判断」）。挂装/叠装样例在未配置云端视觉模型时约 1–3 分钟。
+请依次试下面几个入口（同一套服务）：
 
-本地启动：
+1. https://c3dac47571baff.lhr.life
+2. https://clean-donuts-sell.loca.lt （若弹出密码页，填 `3.133.39.109` 后 Continue）
+3. https://exemption-leeds-incident-cause.trycloudflare.com （需能访问 Cloudflare，适合有代理时）
+
+打开后点「模糊过暗样例」应立刻看到「无法判断」。
+
+以上都是临时公网隧道，过一段时间会失效。最稳的方式是本地启动：
 
 **http://127.0.0.1:8080**
 
