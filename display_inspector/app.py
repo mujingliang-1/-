@@ -56,7 +56,10 @@ app.mount("/samples", StaticFiles(directory=SAMPLES), name="samples")
 
 @app.on_event("startup")
 def _startup() -> None:
-    if not (os.environ.get("VISION_API_KEY") or os.environ.get("OPENAI_API_KEY")):
+    from display_inspector.vision import skip_local_vlm
+
+    has_cloud = bool(os.environ.get("VISION_API_KEY") or os.environ.get("OPENAI_API_KEY"))
+    if not has_cloud and not skip_local_vlm():
         threading.Thread(target=_warmup_local, daemon=True).start()
 
 
@@ -74,11 +77,14 @@ def index() -> FileResponse:
 
 @app.get("/api/health")
 def health() -> dict:
+    from display_inspector.vision import skip_local_vlm
+
     has_cloud = bool(os.environ.get("VISION_API_KEY") or os.environ.get("OPENAI_API_KEY"))
     return {
         "ok": True,
         "name": "服装门店陈列检查助手",
         "cloud_vision_configured": has_cloud,
+        "skip_local_vlm": skip_local_vlm(),
         "local_vlm": local_model_status(),
     }
 

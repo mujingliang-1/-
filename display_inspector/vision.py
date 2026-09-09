@@ -387,6 +387,17 @@ class LocalSmolVLM(VisionBackend):
         return obs
 
 
+class VisionNotConfigured(RuntimeError):
+    """Cloud deploy has no local VLM and no API key."""
+
+
+def skip_local_vlm() -> bool:
+    flag = os.environ.get("SKIP_LOCAL_VLM", "").strip().lower()
+    if flag in {"1", "true", "yes", "on"}:
+        return True
+    return bool(os.environ.get("RENDER"))
+
+
 def resolve_backend(
     api_key: Optional[str] = None,
     base_url: Optional[str] = None,
@@ -398,8 +409,12 @@ def resolve_backend(
         model
         or os.environ.get("VISION_MODEL")
         or os.environ.get("OPENAI_MODEL")
-        or "gpt-4o-mini"
+        or "glm-4v-flash"
     ).strip()
     if key:
         return OpenAICompatibleVision(key, url, model_name)
+    if skip_local_vlm():
+        raise VisionNotConfigured(
+            "云端部署未配置 VISION_API_KEY。内置样例仍可查看；上传新照片请在页面填写智谱/OpenAI 兼容 Key，或在 Render 环境变量中设置。"
+        )
     return LocalSmolVLM()

@@ -7,7 +7,7 @@ from PIL import Image
 from display_inspector.engine import build_report, merge_reports
 from display_inspector.photo_quality import assess_photo
 from display_inspector.schema import Observations, Report
-from display_inspector.vision import VisionBackend, resolve_backend
+from display_inspector.vision import VisionBackend, VisionNotConfigured, resolve_backend
 
 
 def _open_image(data: bytes) -> Image.Image:
@@ -66,7 +66,18 @@ def inspect_images(
             )
             continue
         if backend is None:
-            backend = resolve_backend(api_key=api_key, base_url=base_url, model=model)
+            try:
+                backend = resolve_backend(api_key=api_key, base_url=base_url, model=model)
+            except VisionNotConfigured as exc:
+                reports.append(
+                    build_report(
+                        quality=quality,
+                        observations=Observations(vision_notes=str(exc)),
+                        model_used="vision-not-configured",
+                        images=[filename],
+                    )
+                )
+                continue
         try:
             observations = backend.observe(image, user_note=user_note, region_hint=region_hint)
             model_used = backend.name

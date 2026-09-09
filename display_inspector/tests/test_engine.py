@@ -11,7 +11,7 @@ from display_inspector.schema import (
     PhotoQuality,
     PriceTagObs,
 )
-from display_inspector.vision import parse_tristate
+from display_inspector.vision import VisionNotConfigured, parse_tristate, resolve_backend, skip_local_vlm
 from PIL import Image, ImageDraw, ImageFilter
 
 
@@ -126,3 +126,15 @@ def test_sharp_image_is_usable():
     quality = assess_photo(img)
     assert quality.usable is True
     assert quality.blurry is False
+
+
+def test_skip_local_vlm_on_render(monkeypatch):
+    monkeypatch.setenv("SKIP_LOCAL_VLM", "1")
+    monkeypatch.delenv("VISION_API_KEY", raising=False)
+    monkeypatch.delenv("OPENAI_API_KEY", raising=False)
+    assert skip_local_vlm() is True
+    try:
+        resolve_backend()
+        raise AssertionError("should require API key")
+    except VisionNotConfigured:
+        pass

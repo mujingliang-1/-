@@ -34,8 +34,8 @@
 买一台轻量（约 2 核 2G），解析一个域名（或先用 `http://公网IP:8080`），然后：
 
 ```bash
-git clone https://github.com/mujingliang-1/-.git
-cd -
+git clone https://github.com/mujingliang-1/-.git store-display-inspector
+cd store-display-inspector
 docker build -t display-inspector .
 docker run -d --restart=always -p 8080:8080 \
   -e VISION_API_KEY=你的智谱Key \
@@ -46,15 +46,25 @@ docker run -d --restart=always -p 8080:8080 \
 
 前面再挂 Nginx + HTTPS，入口就会一直是 `https://你的域名`。
 
-**方案 B：Render 免费 Web Service（送 HTTPS 固定域名）**
+**方案 B：Render 固定 HTTPS 地址（仓库已配好，按下面点）**
 
-1. 打开 https://render.com 用 GitHub 登录
-2. New → Web Service → 选这个仓库
-3. 会读取根目录 `Dockerfile` / `render.yaml`
-4. 在 Environment 填入 `VISION_API_KEY`、`VISION_BASE_URL`、`VISION_MODEL`
-5. 部署完成后得到长期地址，例如 `https://xxxx.onrender.com`
+我这边登不了你的 Render 账号，所以不能替你点创建。仓库已经改成免费 Python 服务（不要选 Docker，免费档内存不够）。你按这些步骤做完，会得到长期地址：
 
-免费实例闲置会休眠，第一次打开可能要等 1 分钟，之后就稳定。
+1. 浏览器打开 https://dashboard.render.com ，点 **GitHub** 登录，授权访问仓库 `mujingliang-1/-`
+2. 右上角 **New** → **Blueprint**
+3. 选中这个 GitHub 仓库
+4. **Branch 必须选** `cursor/store-display-inspector-5326`（代码还在这条分支上，不要选 main）
+5. Render 会读根目录 `render.yaml`，服务名是 `store-display-inspector`，地区 Singapore，套餐 Free
+6. 在环境变量里填 **VISION_API_KEY** = 你的智谱 Key（在 https://open.bigmodel.cn 创建）。`VISION_BASE_URL` 和 `VISION_MODEL` 已预填为 `https://open.bigmodel.cn/api/paas/v4` 和 `glm-4v-flash`
+7. 点 **Apply** / **Deploy**，等 Build 变绿（大约 3–8 分钟）
+8. 打开服务页顶部的地址，类似 **https://store-display-inspector.onrender.com**
+9. 先点「模糊过暗样例」确认能出「无法判断」；再点挂装/叠装样例
+
+没有智谱 Key 时也可以先部署：内置样例能看，新上传清晰照片会提示在页面里填写 API Key。
+
+免费实例大约 15 分钟没人访问会休眠，下次打开要等 30–60 秒。把这个 `onrender.com` 地址写进面试提交材料即可。
+
+若 Blueprint 导入失败，改用手动创建：New → **Web Service** → 连 GitHub 仓库 → Language 选 **Python 3** → Build `pip install -r display_inspector/requirements.txt` → Start `PYTHONPATH=. python -m display_inspector` → Instance **Free** → 同样填上面三个环境变量，并加 `SKIP_LOCAL_VLM=1`。
 
 **方案 C：本机长期穿透（cpolar / natapp 固定域名）**
 
