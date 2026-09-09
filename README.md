@@ -20,6 +20,48 @@
 
 **http://127.0.0.1:8080**
 
+### 如何让在线入口长期有效
+
+当前 Cursor 云主机 + `trycloudflare.com` **不可能长期保活**，原因有两条：
+
+1. 临时隧道进程一停，域名立刻从 DNS 里删除（你打不开的旧链接就是这样）。
+2. 这台云开发机在任务结束后会回收，服务一起消失。
+
+要得到「过几天还能打开」的固定网址，必须把 Agent **部署到你自己的云上**。推荐三种：
+
+**方案 A：阿里云 / 腾讯云轻量服务器（国内面试最稳）**
+
+买一台轻量（约 2 核 2G），解析一个域名（或先用 `http://公网IP:8080`），然后：
+
+```bash
+git clone https://github.com/mujingliang-1/-.git
+cd -
+docker build -t display-inspector .
+docker run -d --restart=always -p 8080:8080 \
+  -e VISION_API_KEY=你的智谱Key \
+  -e VISION_BASE_URL=https://open.bigmodel.cn/api/paas/v4 \
+  -e VISION_MODEL=glm-4v-flash \
+  display-inspector
+```
+
+前面再挂 Nginx + HTTPS，入口就会一直是 `https://你的域名`。
+
+**方案 B：Render 免费 Web Service（送 HTTPS 固定域名）**
+
+1. 打开 https://render.com 用 GitHub 登录
+2. New → Web Service → 选这个仓库
+3. 会读取根目录 `Dockerfile` / `render.yaml`
+4. 在 Environment 填入 `VISION_API_KEY`、`VISION_BASE_URL`、`VISION_MODEL`
+5. 部署完成后得到长期地址，例如 `https://xxxx.onrender.com`
+
+免费实例闲置会休眠，第一次打开可能要等 1 分钟，之后就稳定。
+
+**方案 C：本机长期穿透（cpolar / natapp 固定域名）**
+
+如果必须跑在自己电脑上：不要用 trycloudflare。去 [cpolar](https://www.cpolar.com/) 或 natapp 注册，买一个**固定子域名**，把本地 `8080` 映射出去。免费随机域名仍会变，固定域名才是长期入口。
+
+不要指望 Cursor 云里的临时链接给面试官反复打开。面试前提前用方案 A 或 B 部署好，把那个固定 URL 写进提交材料。
+
 ```bash
 python3 -m venv .venv
 source .venv/bin/activate          # Windows: .venv\Scripts\activate
