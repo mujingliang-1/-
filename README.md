@@ -6,7 +6,7 @@
 
 ## 1. Agent 访问入口
 
-**在线试用（可直接打开）：** https://trio-told-boxes-boots.trycloudflare.com
+**在线试用（可直接打开）：** https://exemption-leeds-incident-cause.trycloudflare.com
 
 打开后即可上传门店照片，或点击「模糊过暗样例」（秒出「无法判断」）。挂装/叠装样例在未配置云端视觉模型时约 1–3 分钟。
 
