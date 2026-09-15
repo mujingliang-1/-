@@ -4,6 +4,22 @@
 
 ---
 
+## 最快：自己电脑 + 临时链接
+
+不要腾讯云、不要 Render。下载这一支代码的 ZIP：
+
+https://github.com/mujingliang-1/-/archive/refs/heads/cursor/store-display-inspector-5326.zip
+
+解压后先看 `先看这个.txt`。
+
+1. 双击 `start.bat`（第一次粘贴 DeepSeek Key，勾选 Python 的 Add to PATH）
+2. 本机打开 http://127.0.0.1:8080 能用之后，再双击 `给别人打开.bat`
+3. 把窗口里出现的 `https://...` 发给别人。两个黑窗口不要关。
+
+这是临时链接：电脑关机或窗口关掉就失效。
+
+---
+
 ## 1. 长期访问入口（写进面试材料的那种）
 
 `loca.lt` / `lhr.life` / `trycloudflare.com` 都是临时隧道。链接失效时，浏览器会收到 HTML（例如 `<h1>no tunnel here`），页面就会报「检查失败：Unexpected token '<'」。这不是照片坏了，也不是 DeepSeek Key 坏了。
