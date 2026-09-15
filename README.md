@@ -10,7 +10,53 @@
 
 **Cursor 云主机没法给你长期链接**：任务一结束机器回收，隧道域名立刻作废。必须把服务部署到你自己的账号里。
 
-### 推荐：Render 免费固定 HTTPS（约 5 分钟）
+Render / Railway / Hugging Face 现在注册免费档也经常要 **Visa/Mastercard**。没有国际信用卡就别再走这条路，关掉 Render 即可。
+
+国内用 **支付宝或微信** 就能买云服务器，一般不需要银行卡。
+
+### 有支付宝 / 微信：腾讯云轻量（国内面试最稳）
+
+1. 打开 https://cloud.tencent.com/act/campus （学生）或 https://cloud.tencent.com/product/lighthouse
+2. 微信 / QQ 登录，完成个人实名
+3. 买一台最便宜的轻量（2 核 2G 即可，选广州或上海），用支付宝付款
+4. 控制台放行防火墙 **8080** 端口
+5. 用网页终端或 SSH 登录服务器，粘贴执行：
+
+```bash
+sudo apt-get update
+sudo apt-get install -y git python3 python3-venv python3-pip
+git clone -b cursor/store-display-inspector-5326 https://github.com/mujingliang-1/-.git store-display-inspector
+cd store-display-inspector
+python3 -m venv .venv
+source .venv/bin/activate
+pip install -r display_inspector/requirements.txt
+export SKIP_LOCAL_VLM=1
+export VISION_API_KEY="你的DeepSeek密钥"
+export VISION_BASE_URL="https://api.deepseek.com"
+export VISION_MODEL="deepseek-flash"
+PYTHONPATH=. python -m display_inspector
+```
+
+长期链接就是：`http://服务器公网IP:8080`。把这个写进面试材料。
+
+### 一分钱不花：面试当天用自己电脑
+
+电脑保持开机，本机先跑起来，再用 [cpolar 免费版](https://www.cpolar.com/) 映射 8080。免费域名会变，**只能当天发给面试官**，不能当长期入口。
+
+```bash
+python3 -m venv .venv
+source .venv/bin/activate
+pip install -r display_inspector/requirements.txt
+export SKIP_LOCAL_VLM=1
+export VISION_API_KEY="你的DeepSeek密钥"
+export VISION_BASE_URL="https://api.deepseek.com"
+export VISION_MODEL="deepseek-flash"
+PYTHONPATH=. python -m display_inspector
+```
+
+另开一个终端：`cpolar http 8080`，把显示的 `https://xxxx.cpolar.cn` 发给面试官。
+
+### 推荐：Render 免费固定 HTTPS（需要国际信用卡）
 
 仓库根目录已经有 `render.yaml`。我登不了你的 Render 账号，需要你本地点一次：
 
@@ -27,50 +73,21 @@
 
 Blueprint 失败时改为手动：**New → Web Service** → 连 GitHub 仓库 → Language **Python 3** → Build `pip install -r display_inspector/requirements.txt` → Start `PYTHONPATH=. python -m display_inspector` → Instance **Free** → 同样填上面三个环境变量，并加 `SKIP_LOCAL_VLM=1`。
 
-本机调试仍可用 **http://127.0.0.1:8080**。
-
-### 其他长期方案
-
-**方案 A：阿里云 / 腾讯云轻量服务器（国内面试最稳）**
-
-买一台轻量（约 2 核 2G），解析一个域名（或先用 `http://公网IP:8080`），然后：
+服务器上如果已经装了 Docker，也可以：
 
 ```bash
 git clone -b cursor/store-display-inspector-5326 https://github.com/mujingliang-1/-.git store-display-inspector
 cd store-display-inspector
 docker build -t display-inspector .
 docker run -d --restart=always -p 8080:8080 \
+  -e SKIP_LOCAL_VLM=1 \
   -e VISION_API_KEY=你的DeepSeek密钥 \
   -e VISION_BASE_URL=https://api.deepseek.com \
   -e VISION_MODEL=deepseek-flash \
   display-inspector
 ```
 
-前面再挂 Nginx + HTTPS，入口就会一直是 `https://你的域名`。
-
-**方案 B：本机 + cpolar / natapp 固定域名**
-
-电脑必须一直开着、程序一直跑。不要用 trycloudflare。去 [cpolar](https://www.cpolar.com/) 或 natapp 买**固定子域名**，把本机 `8080` 映射出去。免费随机域名仍会变，不能当长期入口。
-
-不要把 Cursor 云里的临时链接写进面试材料。面试前用 Render 或云服务器部署好，用那个固定 URL。
-
-```bash
-python3 -m venv .venv
-source .venv/bin/activate          # Windows: .venv\Scripts\activate
-pip install -r display_inspector/requirements.txt
-
-# 推荐：DeepSeek 视觉（deepseek-flash 支持图片）。也可改用智谱 GLM-4V / 通义千问 VL / GPT-4o
-# 不要把密钥提交到 git。仓库根目录建 .env 即可（已在 .gitignore）：
-# VISION_API_KEY=sk-...
-# VISION_BASE_URL=https://api.deepseek.com
-# VISION_MODEL=deepseek-flash
-# SKIP_LOCAL_VLM=1
-export VISION_API_KEY="your-key"
-export VISION_BASE_URL="https://api.deepseek.com"
-export VISION_MODEL="deepseek-flash"
-
-PYTHONPATH=. python -m display_inspector
-```
+本机调试仍可用 **http://127.0.0.1:8080**。页面内「视觉接口」栏也可临时填写 API Key，无需改环境变量。
 
 无云端 Key 时，可安装本地视觉依赖（首次会下载约 2.2B 模型，CPU 上单张约 1–3 分钟）：
 
@@ -78,8 +95,6 @@ PYTHONPATH=. python -m display_inspector
 pip install -r display_inspector/requirements-local.txt
 PYTHONPATH=. python -m display_inspector
 ```
-
-页面内「视觉接口」栏也可临时填写 API Key / Base URL / 模型名，无需改环境变量。
 
 ---
 
