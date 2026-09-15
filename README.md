@@ -36,7 +36,7 @@ Blueprint 失败时改为手动：**New → Web Service** → 连 GitHub 仓库 
 买一台轻量（约 2 核 2G），解析一个域名（或先用 `http://公网IP:8080`），然后：
 
 ```bash
-git clone https://github.com/mujingliang-1/-.git store-display-inspector
+git clone -b cursor/store-display-inspector-5326 https://github.com/mujingliang-1/-.git store-display-inspector
 cd store-display-inspector
 docker build -t display-inspector .
 docker run -d --restart=always -p 8080:8080 \
