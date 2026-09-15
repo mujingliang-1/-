@@ -1,30 +1,28 @@
-import React from 'react'
-import { NavLink, useLocation } from 'react-router-dom'
+import { NavLink } from 'react-router-dom'
+import type { ReactNode } from 'react'
 import './AppLayout.css'
 
 const navItems = [
-  { path: '/search', icon: '🔍', label: '文献检索' },
-  { path: '/dashboard', icon: '📊', label: '分析仪表盘' },
-  { path: '/review', icon: '📝', label: '综述编辑器' },
+  { path: '/inspect', icon: '▣', label: '拍照检查' },
+  { path: '/history', icon: '▤', label: '检查记录' },
+  { path: '/standards', icon: '☰', label: '检查标准' },
 ]
 
-export default function AppLayout({ children }: { children?: React.ReactNode }) {
-  const location = useLocation()
-  
+export default function AppLayout({ children }: { children?: ReactNode }) {
   return (
     <div className="app-layout">
-      {/* 左侧导航栏 */}
       <aside className="sidebar">
         <div className="sidebar-header">
           <div className="logo">
-            <span className="logo-icon">📚</span>
-            <span className="logo-text">文献助手</span>
+            <span className="logo-mark">VM</span>
+            <span className="logo-text">陈列巡检</span>
           </div>
+          <p className="logo-sub">总部统一标准 · 视觉 Agent</p>
         </div>
-        
+
         <nav className="sidebar-nav">
           <div className="nav-section">
-            <span className="nav-section-title">功能菜单</span>
+            <span className="nav-section-title">智能巡检</span>
             {navItems.map((item) => (
               <NavLink
                 key={item.path}
@@ -33,25 +31,20 @@ export default function AppLayout({ children }: { children?: React.ReactNode }) 
               >
                 <span className="nav-icon">{item.icon}</span>
                 <span className="nav-label">{item.label}</span>
-                {location.pathname === item.path && <span className="nav-indicator" />}
               </NavLink>
             ))}
           </div>
         </nav>
-        
+
         <div className="sidebar-footer">
           <div className="sidebar-info">
-            <span className="info-icon">💡</span>
-            <span className="info-text">智能文献分析平台</span>
+            <span className="info-text">不确定即「无法判断」，不推测整店</span>
           </div>
         </div>
       </aside>
-      
-      {/* 主内容区 */}
+
       <main className="main-content">
-        <div className="content-wrapper">
-          {children}
-        </div>
+        <div className="content-wrapper">{children}</div>
       </main>
     </div>
   )

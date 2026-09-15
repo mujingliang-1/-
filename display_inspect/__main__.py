@@ -1,4 +1,4 @@
-"""门店陈列合规检查：python -m display_inspect"""
+"""运行：python -m display_inspect"""
 import os
 
 import uvicorn

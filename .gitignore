@@ -7,12 +7,17 @@ __pycache__/
 venv/
 .env
 
+# frontend
+frontend/node_modules/
+frontend/dist/
+
 # logs / outputs
 *.log
 output/
 outputs/
 data_cache/
 cache/
+data/inspections/
 
 # local IDE
 .vscode/
