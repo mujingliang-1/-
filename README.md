@@ -16,11 +16,47 @@ Render / Railway / Hugging Face 现在注册免费档也经常要 **Visa/Masterc
 
 ### 有支付宝 / 微信：腾讯云轻量（国内面试最稳）
 
-1. 打开 https://cloud.tencent.com/act/campus （学生）或 https://cloud.tencent.com/product/lighthouse
-2. 微信 / QQ 登录，完成个人实名
-3. 买一台最便宜的轻量（2 核 2G 即可，选广州或上海），用支付宝付款
-4. 控制台放行防火墙 **8080** 端口
-5. 用网页终端或 SSH 登录服务器，粘贴执行：
+买 2 核 2G 即可。若系统是 **Windows Server**，按下面做（Linux 命令对 Windows 无效）。
+
+**1. 控制台放行 8080（必做，否则外网打不开）**
+
+实例页 → **防火墙** → 添加规则：协议 TCP、端口 `8080`、策略允许、来源 `0.0.0.0/0`。
+
+**2. 重置密码并远程桌面登录**
+
+实例页 → **重置密码**（记下 Administrator 密码）→ 用电脑自带「远程桌面连接」连公网 IP。用户名 `Administrator`。
+
+**3. 在服务器里只装两样：Python 3.12、Git**
+
+- Python：https://www.python.org/downloads/ （勾选 **Add python.exe to PATH**）
+- Git：https://git-scm.com/download/win  
+2GB 内存不要装 Docker Desktop。
+
+**4. 打开 PowerShell，整段粘贴**
+
+把 `sk-你的密钥` 换成自己的 DeepSeek Key：
+
+```powershell
+New-NetFirewallRule -DisplayName "display-inspector-8080" -Direction Inbound -Protocol TCP -LocalPort 8080 -Action Allow -ErrorAction SilentlyContinue
+cd C:\
+git clone -b cursor/store-display-inspector-5326 https://github.com/mujingliang-1/-.git store-display-inspector
+cd C:\store-display-inspector
+@"
+VISION_API_KEY=sk-你的密钥
+VISION_BASE_URL=https://api.deepseek.com
+VISION_MODEL=deepseek-flash
+SKIP_LOCAL_VLM=1
+"@ | Set-Content -Encoding ascii .env
+.\start.bat
+```
+
+看到 `Uvicorn running on http://0.0.0.0:8080` 后，用手机或自己电脑打开：
+
+**http://你的公网IP:8080**
+
+先点「模糊过暗样例」，应出现「无法判断」。远程桌面只点「断开」，不要点「注销」，否则程序会停。
+
+Linux 镜像则用下面命令（Windows 不要用这段）：
 
 ```bash
 sudo apt-get update
