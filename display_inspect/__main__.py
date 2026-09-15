@@ -1,5 +1,6 @@
-"""门店陈列合规检查：python -m display_inspect"""
+"""运行：python -m display_inspect"""
 import uvicorn
+
 from display_inspect.app import app
 
 if __name__ == "__main__":

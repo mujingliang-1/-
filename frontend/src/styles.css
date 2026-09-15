@@ -2,17 +2,17 @@
 @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@300;400;500;600;700&family=Poppins:wght@400;500;600;700&display=swap');
 
 :root {
-  /* 主色调 */
-  --primary-dark: #0a1628;
-  --primary-blue: #1e3a5f;
-  --accent-orange: #f97316;
-  --accent-orange-hover: #ea580c;
-  --accent-purple: #8b5cf6;
+  /* 主色调：服饰零售总部巡检 */
+  --primary-dark: #1c1917;
+  --primary-blue: #292524;
+  --accent-orange: #b45309;
+  --accent-orange-hover: #92400e;
+  --accent-purple: #a16207;
   
   /* 背景色 */
-  --bg-gradient-start: #e8f4fc;
-  --bg-gradient-mid: #ddf0f5;
-  --bg-gradient-end: #d4eef7;
+  --bg-gradient-start: #f7f4ef;
+  --bg-gradient-mid: #f3eee6;
+  --bg-gradient-end: #efe8dc;
   
   /* 文字颜色 */
   --text-primary: #0f172a;

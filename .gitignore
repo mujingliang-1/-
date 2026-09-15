@@ -13,6 +13,7 @@ output/
 outputs/
 data_cache/
 cache/
+data/inspections/
 
 # local IDE
 .vscode/

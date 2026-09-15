@@ -1,10 +1,9 @@
-import React from 'react'
 import { createRoot } from 'react-dom/client'
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom'
 import AppLayout from './components/AppLayout'
-import { SearchPage } from './pages/Search'
-import { DashboardPage } from './pages/Dashboard'
-import { ReviewPage } from './pages/Review'
+import { InspectPage } from './pages/Inspect'
+import { HistoryPage } from './pages/History'
+import { StandardsPage } from './pages/Standards'
 import './styles.css'
 
 function App() {
@@ -12,10 +11,11 @@ function App() {
     <BrowserRouter>
       <AppLayout>
         <Routes>
-          <Route path="/" element={<Navigate to="/search" replace />} />
-          <Route path="/search" element={<SearchPage />} />
-          <Route path="/dashboard" element={<DashboardPage />} />
-          <Route path="/review" element={<ReviewPage />} />
+          <Route path="/" element={<Navigate to="/inspect" replace />} />
+          <Route path="/inspect" element={<InspectPage />} />
+          <Route path="/history" element={<HistoryPage />} />
+          <Route path="/history/:id" element={<HistoryPage />} />
+          <Route path="/standards" element={<StandardsPage />} />
         </Routes>
       </AppLayout>
     </BrowserRouter>
