@@ -131,6 +131,7 @@ def test_sharp_image_is_usable():
 def test_skip_local_vlm_on_render(monkeypatch):
     monkeypatch.setenv("SKIP_LOCAL_VLM", "1")
     monkeypatch.delenv("VISION_API_KEY", raising=False)
+    monkeypatch.delenv("DEEPSEEK_API_KEY", raising=False)
     monkeypatch.delenv("OPENAI_API_KEY", raising=False)
     assert skip_local_vlm() is True
     try:
@@ -138,3 +139,18 @@ def test_skip_local_vlm_on_render(monkeypatch):
         raise AssertionError("should require API key")
     except VisionNotConfigured:
         pass
+
+
+def test_resolve_backend_deepseek_defaults(monkeypatch):
+    monkeypatch.setenv("SKIP_LOCAL_VLM", "1")
+    monkeypatch.delenv("VISION_API_KEY", raising=False)
+    monkeypatch.delenv("OPENAI_API_KEY", raising=False)
+    monkeypatch.delenv("VISION_BASE_URL", raising=False)
+    monkeypatch.delenv("VISION_MODEL", raising=False)
+    monkeypatch.delenv("OPENAI_BASE_URL", raising=False)
+    monkeypatch.delenv("OPENAI_MODEL", raising=False)
+    monkeypatch.setenv("DEEPSEEK_API_KEY", "sk-test-deepseek")
+    backend = resolve_backend()
+    assert backend.model == "deepseek-flash"
+    assert backend.base_url == "https://api.deepseek.com"
+    assert backend.name == "openai-compatible:deepseek-flash"

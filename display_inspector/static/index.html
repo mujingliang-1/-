@@ -44,10 +44,10 @@
 
       <details class="advanced">
         <summary>视觉接口（可选，OpenAI 兼容）</summary>
-        <p class="hint">不填则使用服务端已配置的云端视觉模型，或内置本地视觉模型。支持智谱 GLM-4V、通义千问 VL、GPT-4o 等。</p>
+        <p class="hint">不填则使用服务端已配置的云端视觉模型（如 DeepSeek-flash）。也可临时填写智谱 GLM-4V、通义千问 VL、GPT-4o 等 OpenAI 兼容接口。</p>
         <input id="apiKey" type="password" placeholder="API Key" autocomplete="off" />
-        <input id="baseUrl" type="url" placeholder="Base URL，如 https://open.bigmodel.cn/api/paas/v4" />
-        <input id="model" type="text" placeholder="模型名，如 glm-4v-flash / gpt-4o-mini" />
+        <input id="baseUrl" type="url" placeholder="Base URL，如 https://api.deepseek.com" />
+        <input id="model" type="text" placeholder="模型名，如 deepseek-flash / glm-4v-flash" />
       </details>
 
       <button class="primary" id="run" type="button">开始检查</button>

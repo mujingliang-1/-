@@ -173,14 +173,20 @@ def _user_prompt(user_note: str, region_hint: str) -> str:
     return "\n".join(parts)
 
 
+DEEPSEEK_BASE_URL = "https://api.deepseek.com"
+DEEPSEEK_VISION_MODEL = "deepseek-flash"
+DEFAULT_CLOUD_MODEL = "glm-4v-flash"
+
+
 class OpenAICompatibleVision(VisionBackend):
     def __init__(self, api_key: str, base_url: Optional[str], model: str):
         from openai import OpenAI
 
         self.name = f"openai-compatible:{model}"
+        self.base_url = base_url.rstrip("/") if base_url else None
         kwargs: dict[str, Any] = {"api_key": api_key}
-        if base_url:
-            kwargs["base_url"] = base_url.rstrip("/")
+        if self.base_url:
+            kwargs["base_url"] = self.base_url
         self.client = OpenAI(**kwargs)
         self.model = model
 
@@ -398,23 +404,66 @@ def skip_local_vlm() -> bool:
     return bool(os.environ.get("RENDER"))
 
 
+def cloud_vision_configured() -> bool:
+    return bool(
+        (os.environ.get("VISION_API_KEY") or "").strip()
+        or (os.environ.get("DEEPSEEK_API_KEY") or "").strip()
+        or (os.environ.get("OPENAI_API_KEY") or "").strip()
+    )
+
+
+def configured_vision_model() -> Optional[str]:
+    explicit = (
+        (os.environ.get("VISION_MODEL") or "").strip()
+        or (os.environ.get("OPENAI_MODEL") or "").strip()
+    )
+    if explicit:
+        return explicit
+    url = (os.environ.get("VISION_BASE_URL") or os.environ.get("OPENAI_BASE_URL") or "").lower()
+    if (os.environ.get("DEEPSEEK_API_KEY") or "").strip() or "deepseek.com" in url:
+        return DEEPSEEK_VISION_MODEL
+    return None
+
+
 def resolve_backend(
     api_key: Optional[str] = None,
     base_url: Optional[str] = None,
     model: Optional[str] = None,
 ) -> VisionBackend:
-    key = (api_key or os.environ.get("VISION_API_KEY") or os.environ.get("OPENAI_API_KEY") or "").strip()
-    url = (base_url or os.environ.get("VISION_BASE_URL") or os.environ.get("OPENAI_BASE_URL") or "").strip() or None
-    model_name = (
+    deepseek_env_key = (os.environ.get("DEEPSEEK_API_KEY") or "").strip()
+    key = (
+        api_key
+        or os.environ.get("VISION_API_KEY")
+        or deepseek_env_key
+        or os.environ.get("OPENAI_API_KEY")
+        or ""
+    ).strip()
+    url = (
+        base_url
+        or os.environ.get("VISION_BASE_URL")
+        or os.environ.get("OPENAI_BASE_URL")
+        or ""
+    ).strip() or None
+    explicit_model = (
         model
         or os.environ.get("VISION_MODEL")
         or os.environ.get("OPENAI_MODEL")
-        or "glm-4v-flash"
+        or ""
     ).strip()
+    using_deepseek = bool(
+        (deepseek_env_key and key == deepseek_env_key)
+        or (url and "deepseek.com" in url.lower())
+        or explicit_model.startswith("deepseek-")
+    )
+    if using_deepseek:
+        url = url or DEEPSEEK_BASE_URL
+        model_name = explicit_model or DEEPSEEK_VISION_MODEL
+    else:
+        model_name = explicit_model or DEFAULT_CLOUD_MODEL
     if key:
         return OpenAICompatibleVision(key, url, model_name)
     if skip_local_vlm():
         raise VisionNotConfigured(
-            "云端部署未配置 VISION_API_KEY。内置样例仍可查看；上传新照片请在页面填写智谱/OpenAI 兼容 Key，或在 Render 环境变量中设置。"
+            "云端部署未配置 VISION_API_KEY。内置样例仍可查看；上传新照片请在页面填写 DeepSeek / 智谱等 OpenAI 兼容 Key，或在 Render 环境变量中设置。"
         )
     return LocalSmolVLM()

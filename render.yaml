@@ -16,8 +16,8 @@ services:
       - key: SKIP_LOCAL_VLM
         value: "1"
       - key: VISION_BASE_URL
-        value: https://open.bigmodel.cn/api/paas/v4
+        value: https://api.deepseek.com
       - key: VISION_MODEL
-        value: glm-4v-flash
+        value: deepseek-flash
       - key: VISION_API_KEY
         sync: false

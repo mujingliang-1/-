@@ -228,6 +228,9 @@ loadRules().catch(() => {});
 loadSamples().catch(() => {});
 fetch("/api/health").then((r) => r.json()).then((h) => {
   if (h.local_vlm && h.local_vlm.loaded) statusEl.textContent = "本地视觉模型已就绪。";
-  else if (h.cloud_vision_configured) statusEl.textContent = "已配置云端视觉接口。";
-  else statusEl.textContent = "可直接上传或点自测样例。未填云端视觉接口时，本地模型逐项核验约 1–3 分钟。";
+  else if (h.cloud_vision_configured) {
+    statusEl.textContent = h.vision_model
+      ? `已配置云端视觉：${h.vision_model}。上传清晰照片会走该模型。`
+      : "已配置云端视觉接口。";
+  } else statusEl.textContent = "可直接上传或点自测样例。未填云端视觉接口时，本地模型逐项核验约 1–3 分钟。";
 }).catch(() => {});

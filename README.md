@@ -38,9 +38,9 @@ git clone https://github.com/mujingliang-1/-.git store-display-inspector
 cd store-display-inspector
 docker build -t display-inspector .
 docker run -d --restart=always -p 8080:8080 \
-  -e VISION_API_KEY=你的智谱Key \
-  -e VISION_BASE_URL=https://open.bigmodel.cn/api/paas/v4 \
-  -e VISION_MODEL=glm-4v-flash \
+  -e VISION_API_KEY=你的DeepSeek密钥 \
+  -e VISION_BASE_URL=https://api.deepseek.com \
+  -e VISION_MODEL=deepseek-flash \
   display-inspector
 ```
 
@@ -55,12 +55,12 @@ docker run -d --restart=always -p 8080:8080 \
 3. 选中这个 GitHub 仓库
 4. **Branch 必须选** `cursor/store-display-inspector-5326`（代码还在这条分支上，不要选 main）
 5. Render 会读根目录 `render.yaml`，服务名是 `store-display-inspector`，地区 Singapore，套餐 Free
-6. 在环境变量里填 **VISION_API_KEY** = 你的智谱 Key（在 https://open.bigmodel.cn 创建）。`VISION_BASE_URL` 和 `VISION_MODEL` 已预填为 `https://open.bigmodel.cn/api/paas/v4` 和 `glm-4v-flash`
+6. 在环境变量里填 **VISION_API_KEY** = 你的 DeepSeek Key（在 https://platform.deepseek.com 创建）。`VISION_BASE_URL` 和 `VISION_MODEL` 已预填为 `https://api.deepseek.com` 和 `deepseek-flash`（该模型支持 Vision）
 7. 点 **Apply** / **Deploy**，等 Build 变绿（大约 3–8 分钟）
 8. 打开服务页顶部的地址，类似 **https://store-display-inspector.onrender.com**
 9. 先点「模糊过暗样例」确认能出「无法判断」；再点挂装/叠装样例
 
-没有智谱 Key 时也可以先部署：内置样例能看，新上传清晰照片会提示在页面里填写 API Key。
+没有云端 Key 时也可以先部署：内置样例能看，新上传清晰照片会提示在页面里填写 API Key。
 
 免费实例大约 15 分钟没人访问会休眠，下次打开要等 30–60 秒。把这个 `onrender.com` 地址写进面试提交材料即可。
 
@@ -77,10 +77,15 @@ python3 -m venv .venv
 source .venv/bin/activate          # Windows: .venv\Scripts\activate
 pip install -r display_inspector/requirements.txt
 
-# 推荐：配置 OpenAI 兼容的视觉模型（智谱 GLM-4V / 通义千问 VL / GPT-4o）
+# 推荐：DeepSeek 视觉（deepseek-flash 支持图片）。也可改用智谱 GLM-4V / 通义千问 VL / GPT-4o
+# 不要把密钥提交到 git。仓库根目录建 .env 即可（已在 .gitignore）：
+# VISION_API_KEY=sk-...
+# VISION_BASE_URL=https://api.deepseek.com
+# VISION_MODEL=deepseek-flash
+# SKIP_LOCAL_VLM=1
 export VISION_API_KEY="your-key"
-export VISION_BASE_URL="https://open.bigmodel.cn/api/paas/v4"   # 按供应商修改
-export VISION_MODEL="glm-4v-flash"                               # 按供应商修改
+export VISION_BASE_URL="https://api.deepseek.com"
+export VISION_MODEL="deepseek-flash"
 
 PYTHONPATH=. python -m display_inspector
 ```

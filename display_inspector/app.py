@@ -6,6 +6,11 @@ import threading
 from pathlib import Path
 from typing import Optional
 
+from dotenv import load_dotenv
+
+load_dotenv(Path(__file__).resolve().parents[1] / ".env")
+load_dotenv()
+
 from fastapi import FastAPI, File, Form, Header, HTTPException, UploadFile
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import FileResponse, JSONResponse
@@ -13,7 +18,12 @@ from fastapi.staticfiles import StaticFiles
 
 from display_inspector.inspector import inspect_images
 from display_inspector.rules import rules_public_view
-from display_inspector.vision import load_local_model, local_model_status
+from display_inspector.vision import (
+    cloud_vision_configured,
+    configured_vision_model,
+    load_local_model,
+    local_model_status,
+)
 
 ROOT = Path(__file__).resolve().parent
 STATIC = ROOT / "static"
@@ -58,8 +68,7 @@ app.mount("/samples", StaticFiles(directory=SAMPLES), name="samples")
 def _startup() -> None:
     from display_inspector.vision import skip_local_vlm
 
-    has_cloud = bool(os.environ.get("VISION_API_KEY") or os.environ.get("OPENAI_API_KEY"))
-    if not has_cloud and not skip_local_vlm():
+    if not cloud_vision_configured() and not skip_local_vlm():
         threading.Thread(target=_warmup_local, daemon=True).start()
 
 
@@ -79,11 +88,11 @@ def index() -> FileResponse:
 def health() -> dict:
     from display_inspector.vision import skip_local_vlm
 
-    has_cloud = bool(os.environ.get("VISION_API_KEY") or os.environ.get("OPENAI_API_KEY"))
     return {
         "ok": True,
         "name": "服装门店陈列检查助手",
-        "cloud_vision_configured": has_cloud,
+        "cloud_vision_configured": cloud_vision_configured(),
+        "vision_model": configured_vision_model(),
         "skip_local_vlm": skip_local_vlm(),
         "local_vlm": local_model_status(),
     }
@@ -158,7 +167,7 @@ async def inspect(
             content={
                 "error": "检查失败",
                 "detail": str(exc),
-                "hint": "可在页面中填写 OpenAI 兼容视觉接口（如智谱 GLM-4V），或等待本地视觉模型加载完成。",
+                "hint": "可在页面中填写 OpenAI 兼容视觉接口（如 DeepSeek-flash），或等待本地视觉模型加载完成。",
             },
         )
     return report.model_dump()
