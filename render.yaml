@@ -1,0 +1,23 @@
+# Render Blueprint：免费 Python Web Service（不要用 Docker，免费档通常不够跑镜像）。
+# 在 Render Dashboard → New → Blueprint 导入本仓库，分支选 cursor/store-display-inspector-5326。
+services:
+  - type: web
+    name: store-display-inspector
+    runtime: python
+    plan: free
+    region: singapore
+    branch: cursor/store-display-inspector-5326
+    buildCommand: pip install -r display_inspector/requirements.txt
+    startCommand: PYTHONPATH=. python -m display_inspector
+    healthCheckPath: /api/health
+    envVars:
+      - key: PYTHON_VERSION
+        value: "3.12.3"
+      - key: SKIP_LOCAL_VLM
+        value: "1"
+      - key: VISION_BASE_URL
+        value: https://api.deepseek.com
+      - key: VISION_MODEL
+        value: deepseek-flash
+      - key: VISION_API_KEY
+        sync: false

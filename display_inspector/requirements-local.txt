@@ -1,0 +1,8 @@
+# 本地视觉模型（无云端 API Key 时使用）
+-r requirements.txt
+torch>=2.0.0
+torchvision>=0.15.0
+transformers>=4.46.0
+accelerate>=0.33.0
+sentencepiece>=0.2.0
+num2words>=0.5.13
