@@ -121,21 +121,26 @@ def inspect_image(inspection_id: str, index: int):
 
 
 _FRONTEND_DIST = Path(__file__).resolve().parent.parent / "frontend" / "dist"
-if _FRONTEND_DIST.is_dir():
+_FRONTEND_INDEX = _FRONTEND_DIST / "index.html"
+
+if (_FRONTEND_DIST / "assets").is_dir():
     app.mount("/assets", StaticFiles(directory=_FRONTEND_DIST / "assets"), name="assets")
 
-    @app.get("/")
-    def serve_index():
-        return FileResponse(_FRONTEND_DIST / "index.html")
 
-    @app.get("/inspect")
-    def serve_inspect():
-        return FileResponse(_FRONTEND_DIST / "index.html")
+@app.get("/")
+def serve_index():
+    if _FRONTEND_INDEX.is_file():
+        return FileResponse(_FRONTEND_INDEX)
+    return {
+        "service": "display-inspect",
+        "hint": "前端未构建。运行 cd frontend && npm run build 后重启，或开发时用 npm run dev（5173）。",
+    }
 
-    @app.get("/standards")
-    def serve_standards():
-        return FileResponse(_FRONTEND_DIST / "index.html")
 
-    @app.get("/history")
-    def serve_history():
-        return FileResponse(_FRONTEND_DIST / "index.html")
+@app.get("/{full_path:path}")
+def serve_spa(full_path: str):
+    if full_path.startswith("api/") or full_path == "health":
+        raise HTTPException(status_code=404, detail="Not Found")
+    if _FRONTEND_INDEX.is_file():
+        return FileResponse(_FRONTEND_INDEX)
+    raise HTTPException(status_code=404, detail="frontend not built")
