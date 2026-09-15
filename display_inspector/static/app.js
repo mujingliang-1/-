@@ -155,7 +155,16 @@ async function postInspect(url, body) {
     const opts = { method: "POST", headers: visionHeaders() };
     if (body instanceof FormData) opts.body = body;
     const res = await fetch(url, opts);
-    const data = await res.json();
+    const text = await res.text();
+    let data;
+    try {
+      data = JSON.parse(text);
+    } catch {
+      if (/no tunnel/i.test(text) || text.trim().startsWith("<")) {
+        throw new Error("临时入口已断开（隧道失效）。请换用最新链接，或点页面上的内置样例。");
+      }
+      throw new Error(text.slice(0, 160) || res.statusText);
+    }
     if (!res.ok) throw new Error(data.detail || data.error || res.statusText);
     renderReport(data);
     statusEl.textContent = "检查完成。";
