@@ -146,3 +146,4 @@ def test_price_tag_unreadable_wording():
     )
     tag = next(f for f in report.findings if f.category == "价签")
     assert "内容无法判断" in tag.issue
+    assert tag.standard == "每个陈列组有价签；价签直立、正向、无遮挡；看不清文字时仅能判断「内容无法判断」。"

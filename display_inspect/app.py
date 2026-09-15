@@ -62,8 +62,6 @@ async def create_inspection(
     store_name: str = Form(""),
     note: str = Form(""),
 ):
-    if not llm_configured():
-        raise HTTPException(status_code=503, detail="未配置 DEEPSEEK_API_KEY")
     if not files:
         raise HTTPException(status_code=400, detail="请上传至少一张门店照片")
     if len(files) > MAX_IMAGES:

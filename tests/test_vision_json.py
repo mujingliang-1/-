@@ -9,3 +9,8 @@ def test_extract_json_from_fence():
 def test_extract_json_embedded():
     data = _extract_json('说明如下 {"a": 1, "b": [2]} 结束')
     assert data["a"] == 1
+
+
+def test_extract_json_repairs_truncated_object():
+    data = _extract_json('{"overall": {"compliant": "无法判断", "summary": "x"')
+    assert data["overall"]["compliant"] == "无法判断"

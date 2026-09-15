@@ -82,7 +82,7 @@ def _parse_finding(item: dict, category: str) -> Finding:
     issue = str(item.get("issue") or "").strip() or UNCLEAR
     region = str(item.get("region") or "").strip() or UNCLEAR
     suggestion = str(item.get("suggestion") or "").strip() or UNCLEAR_SUGGESTION
-    standard = str(item.get("standard") or "").strip() or standard_for_category(category)
+    standard = standard_for_category(category)
 
     if not visible:
         compliant = UNCLEAR

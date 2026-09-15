@@ -2,6 +2,7 @@
 from __future__ import annotations
 
 import json
+import logging
 import re
 from typing import Any
 
@@ -14,6 +15,8 @@ from display_inspect.config import (
     VISION_TIMEOUT,
 )
 from display_inspect.rules import rules_for_prompt
+
+logger = logging.getLogger("display_inspect")
 
 SYSTEM_PROMPT = """你是服装连锁品牌总部的陈列合规检查 Agent。
 你只根据照片中【可见且可确认】的证据做判断，并对照总部统一标准输出结构化结果。
@@ -79,19 +82,41 @@ def _extract_json(text: str) -> dict[str, Any]:
     if raw.startswith("```"):
         raw = re.sub(r"^```(?:json)?\s*", "", raw)
         raw = re.sub(r"\s*```$", "", raw)
-    try:
-        data = json.loads(raw)
-        if isinstance(data, dict):
-            return data
-    except json.JSONDecodeError:
-        pass
+    candidates = [raw]
     match = re.search(r"\{[\s\S]*\}", raw)
-    if not match:
-        raise ValueError("模型未返回 JSON")
-    data = json.loads(match.group(0))
-    if not isinstance(data, dict):
-        raise ValueError("JSON 根节点必须是对象")
-    return data
+    if match:
+        candidates.append(match.group(0))
+    last_error: Exception | None = None
+    for candidate in candidates:
+        try:
+            data = json.loads(candidate)
+            if isinstance(data, dict):
+                return data
+        except json.JSONDecodeError as e:
+            last_error = e
+            repaired = _repair_json(candidate)
+            if repaired:
+                try:
+                    data = json.loads(repaired)
+                    if isinstance(data, dict):
+                        return data
+                except json.JSONDecodeError as e2:
+                    last_error = e2
+    raise ValueError(f"模型未返回完整 JSON：{last_error}")
+
+
+def _repair_json(raw: str) -> str | None:
+    text = raw.strip()
+    if not text.startswith("{"):
+        return None
+    # 去掉截断的末尾残片，补齐括号
+    text = re.sub(r",\s*$", "", text)
+    opens = text.count("{") + text.count("[")
+    closes = text.count("}") + text.count("]")
+    if opens > closes:
+        text += "]" * max(0, text.count("[") - text.count("]"))
+        text += "}" * max(0, text.count("{") - text.count("}"))
+    return text
 
 
 def inspect_with_vision(
@@ -122,16 +147,25 @@ def inspect_with_vision(
             }
         )
 
-    resp = client.chat.completions.create(
-        model=DEEPSEEK_MODEL,
-        messages=[
-            {"role": "system", "content": SYSTEM_PROMPT},
-            {"role": "user", "content": content},
-        ],
-        response_format={"type": "json_object"},
-        max_tokens=4096,
-        extra_body={"thinking": {"type": "enabled"}, "reasoning_effort": "high"},
-    )
-    message = resp.choices[0].message
-    text = (message.content or "").strip()
-    return _extract_json(text)
+    last_error: Exception | None = None
+    for thinking in (True, False):
+        extra_body = {"thinking": {"type": "enabled" if thinking else "disabled"}}
+        if thinking:
+            extra_body["reasoning_effort"] = "low"
+        try:
+            resp = client.chat.completions.create(
+                model=DEEPSEEK_MODEL,
+                messages=[
+                    {"role": "system", "content": SYSTEM_PROMPT},
+                    {"role": "user", "content": content},
+                ],
+                response_format={"type": "json_object"},
+                max_tokens=8192,
+                extra_body=extra_body,
+            )
+            text = (resp.choices[0].message.content or "").strip()
+            return _extract_json(text)
+        except Exception as e:
+            last_error = e
+            logger.warning("vision call failed (thinking=%s): %s", thinking, e)
+    raise RuntimeError(f"视觉检查失败：{last_error}") from last_error

@@ -4,10 +4,9 @@ from __future__ import annotations
 import base64
 import uuid
 from datetime import datetime, timezone
-from typing import Any
 
 from display_inspect.config import DEEPSEEK_MODEL, VISION_MAX_SIDE, llm_configured
-from display_inspect.photo_quality import assess_photo, encode_jpeg, load_rgb
+from display_inspect.photo_quality import all_photos_unusable, assess_photo, encode_jpeg, load_rgb
 from display_inspect.postprocess import build_report
 from display_inspect.schemas import InspectionReport, PhotoQuality
 from display_inspect.vision_client import inspect_with_vision
@@ -25,19 +24,27 @@ class DisplayInspectionAgent:
     ) -> InspectionReport:
         if not images:
             raise ValueError("请至少上传一张门店照片")
-        if not llm_configured():
-            raise RuntimeError("未配置 DEEPSEEK_API_KEY")
 
-        qualities: list[PhotoQuality] = []
-        payloads: list[tuple[str, str]] = []
-        for filename, data in images:
-            q = assess_photo(data, filename=filename)
-            qualities.append(q)
-            jpeg = encode_jpeg(load_rgb(data), max_side=VISION_MAX_SIDE)
-            payloads.append(("image/jpeg", base64.b64encode(jpeg).decode("ascii")))
+        qualities: list[PhotoQuality] = [
+            assess_photo(data, filename=filename) for filename, data in images
+        ]
 
-        notes = self._quality_notes(qualities)
-        raw: dict[str, Any] = inspect_with_vision(payloads, notes, extra=extra)
+        if all_photos_unusable(qualities):
+            raw = {
+                "overall": {
+                    "compliant": "无法判断",
+                    "summary": "照片模糊或过暗，相关项无法判断，不能推测整店情况。",
+                },
+                "findings": [],
+            }
+        else:
+            if not llm_configured():
+                raise RuntimeError("未配置 DEEPSEEK_API_KEY")
+            payloads = []
+            for _filename, data in images:
+                jpeg = encode_jpeg(load_rgb(data), max_side=VISION_MAX_SIDE)
+                payloads.append(("image/jpeg", base64.b64encode(jpeg).decode("ascii")))
+            raw = inspect_with_vision(payloads, self._quality_notes(qualities), extra=extra)
 
         now = datetime.now(timezone.utc).astimezone()
         return build_report(
@@ -48,7 +55,7 @@ class DisplayInspectionAgent:
             store_id=store_id,
             store_name=store_name,
             image_count=len(images),
-            model=DEEPSEEK_MODEL,
+            model=DEEPSEEK_MODEL if llm_configured() else "",
         )
 
     @staticmethod
