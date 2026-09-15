@@ -4,30 +4,32 @@
 
 ---
 
-## 1. Agent 访问入口
+## 1. 长期访问入口（写进面试材料的那种）
 
-智能体跑在海外机器上。`*.trycloudflare.com` 是 Cloudflare 临时隧道，**国内网络经常无法解析或被拦截**，所以浏览器会显示打不开。这不是页面坏了。
+`loca.lt` / `lhr.life` / `trycloudflare.com` 都是临时隧道。链接失效时，浏览器会收到 HTML（例如 `<h1>no tunnel here`），页面就会报「检查失败：Unexpected token '<'」。这不是照片坏了，也不是 DeepSeek Key 坏了。
 
-请依次试下面几个入口（同一套服务）：
+**Cursor 云主机没法给你长期链接**：任务一结束机器回收，隧道域名立刻作废。必须把服务部署到你自己的账号里。
 
-1. https://c3dac47571baff.lhr.life
-2. https://clean-donuts-sell.loca.lt （若弹出密码页，填 `3.133.39.109` 后 Continue）
-3. https://exemption-leeds-incident-cause.trycloudflare.com （需能访问 Cloudflare，适合有代理时）
+### 推荐：Render 免费固定 HTTPS（约 5 分钟）
 
-打开后点「模糊过暗样例」应立刻看到「无法判断」。
+仓库根目录已经有 `render.yaml`。我登不了你的 Render 账号，需要你本地点一次：
 
-以上都是临时公网隧道，过一段时间会失效。最稳的方式是本地启动：
+1. 打开 https://dashboard.render.com ，用 **GitHub** 登录，授权仓库 `mujingliang-1/-`
+2. 右上角 **New** → **Blueprint**
+3. 选中这个 GitHub 仓库
+4. **Branch 必须选** `cursor/store-display-inspector-5326`（检查助手还在这条分支上，不要选 `main`）
+5. 环境变量 **VISION_API_KEY** 填你的 DeepSeek Key。`VISION_BASE_URL`=`https://api.deepseek.com`、`VISION_MODEL`=`deepseek-flash` 已预填
+6. 点 **Apply** / **Deploy**，等 Build 变绿（大约 3–8 分钟）
+7. 服务页顶部会出现类似 **https://store-display-inspector.onrender.com** 的地址——这就是长期链接
+8. 打开后先点「模糊过暗样例」，应立刻看到「无法判断」
 
-**http://127.0.0.1:8080**
+免费实例大约 15 分钟没人访问会休眠，下次第一次打开要等 30–60 秒。把这个 `onrender.com` 地址写进提交材料即可。
 
-### 如何让在线入口长期有效
+Blueprint 失败时改为手动：**New → Web Service** → 连 GitHub 仓库 → Language **Python 3** → Build `pip install -r display_inspector/requirements.txt` → Start `PYTHONPATH=. python -m display_inspector` → Instance **Free** → 同样填上面三个环境变量，并加 `SKIP_LOCAL_VLM=1`。
 
-当前 Cursor 云主机 + `trycloudflare.com` **不可能长期保活**，原因有两条：
+本机调试仍可用 **http://127.0.0.1:8080**。
 
-1. 临时隧道进程一停，域名立刻从 DNS 里删除（你打不开的旧链接就是这样）。
-2. 这台云开发机在任务结束后会回收，服务一起消失。
-
-要得到「过几天还能打开」的固定网址，必须把 Agent **部署到你自己的云上**。推荐三种：
+### 其他长期方案
 
 **方案 A：阿里云 / 腾讯云轻量服务器（国内面试最稳）**
 
@@ -46,31 +48,11 @@ docker run -d --restart=always -p 8080:8080 \
 
 前面再挂 Nginx + HTTPS，入口就会一直是 `https://你的域名`。
 
-**方案 B：Render 固定 HTTPS 地址（仓库已配好，按下面点）**
+**方案 B：本机 + cpolar / natapp 固定域名**
 
-我这边登不了你的 Render 账号，所以不能替你点创建。仓库已经改成免费 Python 服务（不要选 Docker，免费档内存不够）。你按这些步骤做完，会得到长期地址：
+电脑必须一直开着、程序一直跑。不要用 trycloudflare。去 [cpolar](https://www.cpolar.com/) 或 natapp 买**固定子域名**，把本机 `8080` 映射出去。免费随机域名仍会变，不能当长期入口。
 
-1. 浏览器打开 https://dashboard.render.com ，点 **GitHub** 登录，授权访问仓库 `mujingliang-1/-`
-2. 右上角 **New** → **Blueprint**
-3. 选中这个 GitHub 仓库
-4. **Branch 必须选** `cursor/store-display-inspector-5326`（代码还在这条分支上，不要选 main）
-5. Render 会读根目录 `render.yaml`，服务名是 `store-display-inspector`，地区 Singapore，套餐 Free
-6. 在环境变量里填 **VISION_API_KEY** = 你的 DeepSeek Key（在 https://platform.deepseek.com 创建）。`VISION_BASE_URL` 和 `VISION_MODEL` 已预填为 `https://api.deepseek.com` 和 `deepseek-flash`（该模型支持 Vision）
-7. 点 **Apply** / **Deploy**，等 Build 变绿（大约 3–8 分钟）
-8. 打开服务页顶部的地址，类似 **https://store-display-inspector.onrender.com**
-9. 先点「模糊过暗样例」确认能出「无法判断」；再点挂装/叠装样例
-
-没有云端 Key 时也可以先部署：内置样例能看，新上传清晰照片会提示在页面里填写 API Key。
-
-免费实例大约 15 分钟没人访问会休眠，下次打开要等 30–60 秒。把这个 `onrender.com` 地址写进面试提交材料即可。
-
-若 Blueprint 导入失败，改用手动创建：New → **Web Service** → 连 GitHub 仓库 → Language 选 **Python 3** → Build `pip install -r display_inspector/requirements.txt` → Start `PYTHONPATH=. python -m display_inspector` → Instance **Free** → 同样填上面三个环境变量，并加 `SKIP_LOCAL_VLM=1`。
-
-**方案 C：本机长期穿透（cpolar / natapp 固定域名）**
-
-如果必须跑在自己电脑上：不要用 trycloudflare。去 [cpolar](https://www.cpolar.com/) 或 natapp 注册，买一个**固定子域名**，把本地 `8080` 映射出去。免费随机域名仍会变，固定域名才是长期入口。
-
-不要指望 Cursor 云里的临时链接给面试官反复打开。面试前提前用方案 A 或 B 部署好，把那个固定 URL 写进提交材料。
+不要把 Cursor 云里的临时链接写进面试材料。面试前用 Render 或云服务器部署好，用那个固定 URL。
 
 ```bash
 python3 -m venv .venv
