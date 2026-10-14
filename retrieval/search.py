@@ -21,7 +21,8 @@ DEFAULT_TITLE_BONUS = 0.2
 
 def _title_match_bonus(title: str, topic_terms: list[str] | None, raw_query: str) -> float:
     """标题中含检索词则返回 1.0，否则 0；用于排序时优先标题匹配。"""
-    if not title or not (topic_terms or raw_query or "").strip():
+    query_text = (raw_query or "").strip()
+    if not title or not (topic_terms or query_text):
         return 0.0
     title_lower = (title or "").strip().lower()
     if topic_terms:
